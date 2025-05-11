@@ -1,51 +1,65 @@
 package aiss.bitbucketminer1.service;
 
-
-import aiss.bitbucketminer1.model.GitMiner.Comment;
-import aiss.bitbucketminer1.model.GitMiner.User;
+import aiss.bitbucketminer1.model.BitBucket.comment.CommentJava;
+import aiss.bitbucketminer1.model.BitBucket.comment.CommentsJavaContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.http.ResponseEntity;
 
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class CommentService {
+
+    private final static String baseUri = "https://api.bitbucket.org/2.0/repositories";
     @Autowired
     RestTemplate restTemplate;
-    final String baseUri = "https://api.bitbucket.org/2.0/repositories/";
 
-    public List<Comment> getNotes(String owner, String repo, String
-            iid) {
-        String uri = baseUri + owner + "/" + repo + "/issues/" + iid + "/comments";
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer ");
-        HttpEntity<String[]> request = new HttpEntity<>(null, headers);
-        ResponseEntity<Comment[]> response = restTemplate.exchange(uri,
-                HttpMethod.GET, request, Comment[].class);
-        List<Comment> comments =
-                Arrays.stream(response.getBody()).toList();
-        mapAuthorValues(comments);
-        return comments;
+    public List<CommentJava> findCommentsFromIssue(Integer issueId, String workspace, String repo, Integer maxPages) {
+        String uri = baseUri + "/" + workspace + "/" + repo + "/issues/" + issueId + "/comments";
+        List<CommentJava> comments = new ArrayList<>();
+        int pageCount = 0;
+        try {
+            while (uri != null && (maxPages == null || pageCount < maxPages)) {
+                ResponseEntity<CommentsJavaContainer> response = restTemplate.exchange(
+                        uri,
+                        HttpMethod.GET,
+                        createAuthEntity(),
+                        CommentsJavaContainer.class
+                );
+                CommentsJavaContainer body = response.getBody();
+                if (body != null) {
+                    if (body.getValues() != null) {
+                        comments.addAll(body.getValues());
+                    }
+                    uri = body.getNext();
+                    pageCount++;
+                } else {
+                    break;
+                }
+            }
+            return comments;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public void mapAuthorValues(List<Comment> comments) {
-        for (Comment comment : comments) {
-            if (comment != null) {
-                User commentAuthor = comment.getUser();
-                String commentAuthorUserName = commentAuthor.getLogin();
-                String commentAuthorName = commentAuthor.getLogin();
-                String commentAuthorWebUrl = commentAuthor.getHtmlUrl();
-                comment.setAuthor(commentAuthor);
-                commentAuthor.setUsername(commentAuthorUserName);
-                commentAuthor.setName(commentAuthorName);
-                commentAuthor.setWebUrl(commentAuthorWebUrl);
-            }
-        }
+    private HttpEntity<String> createAuthEntity() {
+        String username = "secreto";
+        String appPassword = "secreto";
+        String auth = username + ":" + appPassword;
+        byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(StandardCharsets.US_ASCII));
+        String authHeader = "Basic " + new String(encodedAuth);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", authHeader);
+        return new HttpEntity<>(headers);
     }
 }
