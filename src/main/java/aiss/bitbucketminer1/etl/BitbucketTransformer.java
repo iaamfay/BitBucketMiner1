@@ -7,6 +7,7 @@ import aiss.bitbucketminer1.model.BitBucket.project.ProjectJava;
 import aiss.bitbucketminer1.model.BitBucket.user.UserJava;
 import aiss.bitbucketminer1.model.GitMiner.*;
 import org.springframework.stereotype.Component;
+import aiss.bitbucketminer1.service.CommentService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,10 @@ public class BitbucketTransformer {
 
     public Project transformProject(ProjectJava bitbucketProject,
                                     List<CommitJava> bitbucketCommits,
-                                    List<IssuesJava> bitbucketIssues) {
+                                    List<IssuesJava> bitbucketIssues,
+                                    String workspace,
+                                    String repo,
+                                    Integer maxPages) {
         if (bitbucketProject == null) {
             return null;
         }
@@ -55,8 +59,7 @@ public class BitbucketTransformer {
                                     !issue.getTitle().isEmpty() &&
                                     issue.getReporter() != null
                     )
-                    .map(issue -> transformIssue(issue, CommentService.findCommentsFromIssue(issue.getId(), workspace, repo, maxPages))
-                            .collect(Collectors.toList()));
+                    .map(issue -> transformIssue(issue, CommentService.findCommentsFromIssue(issue.getId(), workspace, repo, maxPages))).toList();
             gitMinerProject.setIssues(validIssues);
         }
 
@@ -109,8 +112,8 @@ public class BitbucketTransformer {
         return gitMinerCommit;
     }
 
-    // Transformación individual de un Issue (usa el constructor con todos los campos requeridos)
-    public Issue transformIssue(IssuesJava bitbucketIssue) {
+
+    public Issue transformIssue(IssuesJava bitbucketIssue, List<CommentJava> comments) {
         Issue gitMinerIssue = new Issue();
         gitMinerIssue.setId(bitbucketIssue.getId().toString());
         gitMinerIssue.setTitle(bitbucketIssue.getTitle());
@@ -119,10 +122,10 @@ public class BitbucketTransformer {
         gitMinerIssue.setUpdatedAt(bitbucketIssue.getUpdatedOn());
         gitMinerIssue.setLabels(new ArrayList<String>(List.of(bitbucketIssue.getKind())));
         gitMinerIssue.setAuthor(transformUser(bitbucketIssue.getReporter()));
-        if(gitMinerIssue.getAssignee()!=null)gitMinerIssue.setAssignee(transformUser(bitbucketIssue.getAssignee()));
-        List<CommentJava> comments = CommentService.findCommentsFromIssue(bitbucketIssue.getId(), workspace,repo,maxPages);
-        gitMinerIssue.setComments(comments.stream().map(this::transformComment).toList());
-
+        if (bitbucketIssue.getAssignee() != null) {
+            gitMinerIssue.setAssignee(transformUser(bitbucketIssue.getAssignee()));
+        }
+        gitMinerIssue.setComments(comments.stream().map(this::transformComment).toList()); // Usa la lista pasada como parámetro
         return gitMinerIssue;
     }
 

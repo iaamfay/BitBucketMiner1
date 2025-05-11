@@ -23,7 +23,7 @@ public class CommentService {
     @Autowired
     RestTemplate restTemplate;
 
-    public List<CommentJava> findCommentsFromIssue(Integer issueId, String workspace, String repo, Integer maxPages) {
+    public static List<CommentJava> findCommentsFromIssue(Integer issueId, String workspace, String repo, Integer maxPages) {
         String uri = baseUri + "/" + workspace + "/" + repo + "/issues/" + issueId + "/comments";
         List<CommentJava> comments = new ArrayList<>();
         int pageCount = 0;

@@ -11,5 +11,4 @@ public class Bitbucketminer1Application {
     public static void main(String[] args) {
         SpringApplication.run(Bitbucketminer1Application.class, args);
     }
-
 }

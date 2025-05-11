@@ -63,7 +63,7 @@ public class BitBucketMinerController {
                     List<CommentJava> comments = commentService.findCommentsFromIssue(
                             issue.getId(), workspace, repo, maxPages
                     );
-                    return transformer.transformIssue(issue);
+                    return transformer.transformIssue(issue, comments);
                 })
                 .collect(Collectors.toList());
 
@@ -71,7 +71,10 @@ public class BitBucketMinerController {
         Project gitMinerProject = transformer.transformProject(
                 bitbucketProject,
                 bitbucketCommits,
-                bitbucketIssues
+                bitbucketIssues,
+                workspace,
+                repo,
+                maxPages
         );
 
         // Set the transformed issues
