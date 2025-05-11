@@ -21,7 +21,7 @@ public class CommentService {
 
     private final static String baseUri = "https://api.bitbucket.org/2.0/repositories";
     @Autowired
-    RestTemplate restTemplate;
+    static RestTemplate restTemplate;
 
     public static List<CommentJava> findCommentsFromIssue(Integer issueId, String workspace, String repo, Integer maxPages) {
         String uri = baseUri + "/" + workspace + "/" + repo + "/issues/" + issueId + "/comments";
@@ -52,7 +52,7 @@ public class CommentService {
         }
     }
 
-    private HttpEntity<String> createAuthEntity() {
+    private static HttpEntity<String> createAuthEntity() {
         String username = "secreto";
         String appPassword = "secreto";
         String auth = username + ":" + appPassword;
