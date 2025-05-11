@@ -110,7 +110,7 @@ public class BitbucketTransformer {
     }
 
     // Transformación individual de un Issue (usa el constructor con todos los campos requeridos)
-    private Issue transformIssue(IssuesJava bitbucketIssue) {
+    public Issue transformIssue(IssuesJava bitbucketIssue) {
         Issue gitMinerIssue = new Issue();
         gitMinerIssue.setId(bitbucketIssue.getId().toString());
         gitMinerIssue.setTitle(bitbucketIssue.getTitle());
