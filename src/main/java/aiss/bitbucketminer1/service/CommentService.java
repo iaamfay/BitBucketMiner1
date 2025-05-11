@@ -15,7 +15,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class CommentService {
@@ -23,15 +22,15 @@ public class CommentService {
     private final static String baseUri = "https://api.bitbucket.org/2.0/repositories";
 
     @Autowired
-    static RestTemplate restTemplate;
+    private RestTemplate restTemplate;
 
     @Value("${bitbucketminer.token}")
-    private static String token;
+    private String token;
 
     @Value("${bitbucketminer.username}")
-    private static String username;
+    private String username;
 
-    public static List<CommentJava> findCommentsFromIssue(Integer issueId, String workspace, String repo, Integer maxPages) {
+    public List<CommentJava> findCommentsFromIssue(Integer issueId, String workspace, String repo, Integer maxPages) {
         String uri = baseUri + "/" + workspace + "/" + repo + "/issues/" + issueId + "/comments";
         List<CommentJava> comments = new ArrayList<>();
         int pageCount = 0;
@@ -60,7 +59,7 @@ public class CommentService {
         }
     }
 
-    private static HttpEntity<String> createAuthEntity() {
+    private HttpEntity<String> createAuthEntity() {
         String auth = username + ":" + token;
         byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(StandardCharsets.US_ASCII));
         String authHeader = "Basic " + new String(encodedAuth);

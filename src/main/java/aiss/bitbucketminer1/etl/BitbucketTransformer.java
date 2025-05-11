@@ -6,6 +6,7 @@ import aiss.bitbucketminer1.model.BitBucket.issues.IssuesJava;
 import aiss.bitbucketminer1.model.BitBucket.project.ProjectJava;
 import aiss.bitbucketminer1.model.BitBucket.user.UserJava;
 import aiss.bitbucketminer1.model.GitMiner.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import aiss.bitbucketminer1.service.CommentService;
 
@@ -15,6 +16,12 @@ import java.util.stream.Collectors;
 
 @Component
 public class BitbucketTransformer {
+    private final CommentService commentService;
+
+    @Autowired
+    public BitbucketTransformer(CommentService commentService) {
+        this.commentService = commentService;
+    }
 
     public Project transformProject(ProjectJava bitbucketProject,
                                     List<CommitJava> bitbucketCommits,
@@ -59,7 +66,7 @@ public class BitbucketTransformer {
                                     !issue.getTitle().isEmpty() &&
                                     issue.getReporter() != null
                     )
-                    .map(issue -> transformIssue(issue, CommentService.findCommentsFromIssue(issue.getId(), workspace, repo, maxPages))).toList();
+                    .map(issue -> transformIssue(issue, commentService.findCommentsFromIssue(issue.getId(), workspace, repo, maxPages))).toList();
             gitMinerProject.setIssues(validIssues);
         }
 
