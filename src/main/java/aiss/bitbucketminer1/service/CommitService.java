@@ -3,6 +3,7 @@ package aiss.bitbucketminer1.service;
 import aiss.bitbucketminer1.model.BitBucket.commit.CommitJava;
 import aiss.bitbucketminer1.model.BitBucket.commit.CommitJavaContainer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -20,8 +21,15 @@ import java.util.Objects;
 public class CommitService {
 
     private final static String baseUri = "https://api.bitbucket.org/2.0/repositories";
+
     @Autowired
     RestTemplate restTemplate;
+
+    @Value("${bitbucketminer.token}")
+    private String token;
+
+    @Value("${bitbucketminer.username}")
+    private String username;
 
     public List<CommitJava> getAllCommits(String workspace, String repo) {
         String uri = baseUri + "/" + workspace + "/" + repo + "/commits";
@@ -82,9 +90,7 @@ public class CommitService {
     }
 
     private HttpEntity<String> createAuthEntity() {
-        String username = "secreto";
-        String appPassword = "secreto";
-        String auth = username + ":" + appPassword;
+        String auth = username + ":" + token;
         byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(StandardCharsets.US_ASCII));
         String authHeader = "Basic " + new String(encodedAuth);
         HttpHeaders headers = new HttpHeaders();

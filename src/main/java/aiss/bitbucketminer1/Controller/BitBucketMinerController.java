@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1")
 public class BitBucketMinerController {
 
     @Autowired
@@ -41,8 +40,7 @@ public class BitBucketMinerController {
     @Autowired
     private RestTemplate restTemplate;
 
-    @Value("${gitminer.api.url:http://localhost:8081/gitminer/v1/projects}")
-    private String gitMinerApiUrl;
+    final String gitMinerApiUrl = "http://localhost:8081/bitbucketminer/v1/projects";
 
     @GetMapping("/bitbucket/{workspace}/{repo}")
     public ResponseEntity<Project> getRepositoryData(
