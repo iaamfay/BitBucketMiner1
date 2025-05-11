@@ -4,6 +4,7 @@ package aiss.bitbucketminer1.model.BitBucket.issues;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import aiss.bitbucketminer1.model.BitBucket.user.UserJava;
 import com.fasterxml.jackson.annotation.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
