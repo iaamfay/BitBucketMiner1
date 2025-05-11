@@ -107,7 +107,7 @@ public class BitBucketMinerController {
         return ResponseEntity.ok(gitMinerResponse.getBody());
     }
 
-    @PostMapping("/gitminer/v1/projects")
+    @PostMapping("/bitbucketminer/v1/projects")
     public ResponseEntity<Project> receiveProject(@RequestBody Project project) {
         System.out.println("Project received: " + project.getName());
         return ResponseEntity.ok(project);
