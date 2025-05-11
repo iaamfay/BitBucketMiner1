@@ -35,17 +35,17 @@ public class BitbucketTransformer {
 
         Project gitMinerProject = new Project();
 
-        // Set basic project information
+
         gitMinerProject.setId(bitbucketProject.getUuid());
         gitMinerProject.setName(bitbucketProject.getName());
 
-        // Set web URL from links if available
+
         if (bitbucketProject.getLinks() != null &&
                 bitbucketProject.getLinks().getHtml() != null) {
             gitMinerProject.setWebUrl(bitbucketProject.getLinks().getHtml().getHref());
         }
 
-        // Transform and set commits if available
+
         if (bitbucketCommits != null) {
             List<Commit> validCommits = bitbucketCommits.stream()
                     .filter(commit ->
@@ -58,7 +58,7 @@ public class BitbucketTransformer {
             gitMinerProject.setCommits(validCommits);
         }
 
-        // Transform and set issues if available
+
         if (bitbucketIssues != null) {
             List<Issue> validIssues = bitbucketIssues.stream()
                     .filter(issue ->
@@ -73,7 +73,7 @@ public class BitbucketTransformer {
         return gitMinerProject;
     }
 
-    // Transformación individual de un Commit
+
     public Commit transformCommit(CommitJava bitbucketCommit) {
         if (bitbucketCommit == null) {
             return null;
@@ -81,22 +81,22 @@ public class BitbucketTransformer {
 
         Commit gitMinerCommit = new Commit();
 
-        // Set basic fields
+
         gitMinerCommit.setId(bitbucketCommit.getHash());
         gitMinerCommit.setMessage(bitbucketCommit.getMessage());
         gitMinerCommit.setAuthoredDate(bitbucketCommit.getDate());
 
-        // Set title from summary if available, otherwise first line of message
+
         if (bitbucketCommit.getSummary() != null && bitbucketCommit.getSummary().getRaw() != null) {
             gitMinerCommit.setTitle(bitbucketCommit.getSummary().getRaw());
         } else if (bitbucketCommit.getMessage() != null) {
             gitMinerCommit.setTitle(bitbucketCommit.getMessage().split("\n")[0]);
         }
 
-        // Set author information
+
         if (bitbucketCommit.getAuthor() != null) {
             gitMinerCommit.setAuthorName(bitbucketCommit.getAuthor().getRaw());
-            // If author has email in format "Name <email@example.com>", parse it
+
             if (bitbucketCommit.getAuthor().getRaw() != null &&
                     bitbucketCommit.getAuthor().getRaw().contains("<") &&
                     bitbucketCommit.getAuthor().getRaw().contains(">")) {
@@ -109,7 +109,7 @@ public class BitbucketTransformer {
             }
         }
 
-        // Set web URL from links if available
+
         if (bitbucketCommit.getLinks() != null &&
                 bitbucketCommit.getLinks().getHtml() != null &&
                 bitbucketCommit.getLinks().getHtml().getHref() != null) {
@@ -132,11 +132,11 @@ public class BitbucketTransformer {
         if (bitbucketIssue.getAssignee() != null) {
             gitMinerIssue.setAssignee(transformUser(bitbucketIssue.getAssignee()));
         }
-        gitMinerIssue.setComments(comments.stream().map(this::transformComment).toList()); // Usa la lista pasada como parámetro
+        gitMinerIssue.setComments(comments.stream().map(this::transformComment).toList());
         return gitMinerIssue;
     }
 
-    // Transformación de un User
+
     public User transformUser(UserJava bitbucketUser) {
         if (bitbucketUser == null) {
             return null;
@@ -144,19 +144,19 @@ public class BitbucketTransformer {
 
         User gitMinerUser = new User();
 
-        // Set basic fields
+
         gitMinerUser.setId(bitbucketUser.getUuid());
-        gitMinerUser.setUsername(bitbucketUser.getNickname()); // Using nickname as username
+        gitMinerUser.setUsername(bitbucketUser.getNickname());
         gitMinerUser.setName(bitbucketUser.getDisplayName());
 
-        // Set avatar URL if available
+
         if (bitbucketUser.getLinks() != null &&
                 bitbucketUser.getLinks().getAvatar() != null &&
                 bitbucketUser.getLinks().getAvatar().getHref() != null) {
             gitMinerUser.setAvatarUrl(bitbucketUser.getLinks().getAvatar().getHref());
         }
 
-        // webUrl could be set from links.self.href if available
+
         if (bitbucketUser.getLinks() != null &&
                 bitbucketUser.getLinks().getSelf() != null &&
                 bitbucketUser.getLinks().getSelf().getHref() != null) {
@@ -166,7 +166,7 @@ public class BitbucketTransformer {
         return gitMinerUser;
     }
 
-    // Transformación de un Comment
+
     public Comment transformComment(CommentJava bitbucketComment) {
         if (bitbucketComment == null) {
             return null;
@@ -174,17 +174,17 @@ public class BitbucketTransformer {
 
         Comment gitMinerComment = new Comment();
 
-        // Set basic fields
+
         gitMinerComment.setId(bitbucketComment.getId().toString());
         gitMinerComment.setCreatedAt(bitbucketComment.getCreatedOn());
         gitMinerComment.setUpdatedAt(bitbucketComment.getUpdatedOn());
 
-        // Set body/content
+
         if (bitbucketComment.getContent() != null) {
             gitMinerComment.setBody(bitbucketComment.getContent().getRaw());
         }
 
-        // Transform author
+
         if (bitbucketComment.getUser() != null) {
             gitMinerComment.setAuthor(transformUser(bitbucketComment.getUser()));
         }

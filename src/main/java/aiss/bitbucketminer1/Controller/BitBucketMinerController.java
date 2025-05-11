@@ -81,7 +81,7 @@ public class BitBucketMinerController {
         List<CommitJava> bitbucketCommits = commitService.getNCommits(workspace, repo, nCommits, maxPages);
         List<IssuesJava> bitbucketIssues = issuesService.nIssues(workspace, repo, nIssues, maxPages);
 
-        // Transform issues with comments
+
         List<Issue> transformedIssues = bitbucketIssues.stream()
                 .map(issue -> {
                     List<CommentJava> comments = commentService.findCommentsFromIssue(
@@ -91,7 +91,7 @@ public class BitBucketMinerController {
                 })
                 .collect(Collectors.toList());
 
-        // Transform project
+
         Project gitMinerProject = transformer.transformProject(
                 bitbucketProject,
                 bitbucketCommits,
@@ -101,7 +101,7 @@ public class BitBucketMinerController {
                 maxPages
         );
 
-        // Set the transformed issues
+
         gitMinerProject.setIssues(transformedIssues);
 
         return ResponseEntity.ok(gitMinerProject);
@@ -125,13 +125,13 @@ public class BitBucketMinerController {
             @RequestParam(defaultValue = "5") Integer nIssues,
             @Parameter(description = "maximum of pages,default 2")
             @RequestParam(defaultValue = "2") Integer maxPages) {
-        // Get and transform data (same as GET endpoint)
+
         ResponseEntity<Project> response = getRepositoryData(
                 workspace, repo, nCommits, nIssues, maxPages
         );
         Project gitMinerProject = response.getBody();
 
-        // Send to GitMiner
+
         HttpEntity<Project> request = new HttpEntity<>(gitMinerProject);
         ResponseEntity<Project> gitMinerResponse = restTemplate.exchange(
                 gitMinerApiUrl,
