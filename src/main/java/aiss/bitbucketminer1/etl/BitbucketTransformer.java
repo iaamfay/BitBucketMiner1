@@ -157,13 +157,28 @@ public class BitbucketTransformer {
     }
 
     // Transformación de un Comment
-    private Comment transformComment(Comment bitbucketComment) {
+    public Comment transformComment(CommentJava bitbucketComment) {
+        if (bitbucketComment == null) {
+            return null;
+        }
+
         Comment gitMinerComment = new Comment();
-        gitMinerComment.setId(bitbucketComment.getId());
-        gitMinerComment.setBody(bitbucketComment.getBody());
-        gitMinerComment.setCreatedAt(bitbucketComment.getCreatedAt());
-        gitMinerComment.setUpdatedAt(bitbucketComment.getUpdatedAt());
-        gitMinerComment.setAuthor(transformUser(bitbucketComment.getAuthor()));
+
+        // Set basic fields
+        gitMinerComment.setId(bitbucketComment.getId().toString());
+        gitMinerComment.setCreatedAt(bitbucketComment.getCreatedOn());
+        gitMinerComment.setUpdatedAt(bitbucketComment.getUpdatedOn());
+
+        // Set body/content
+        if (bitbucketComment.getContent() != null) {
+            gitMinerComment.setBody(bitbucketComment.getContent().getRaw());
+        }
+
+        // Transform author
+        if (bitbucketComment.getUser() != null) {
+            gitMinerComment.setAuthor(transformUser(bitbucketComment.getUser()));
+        }
+
         return gitMinerComment;
     }
 }
