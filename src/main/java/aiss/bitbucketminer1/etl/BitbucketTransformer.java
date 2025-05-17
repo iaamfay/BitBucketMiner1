@@ -180,8 +180,10 @@ public class BitbucketTransformer {
         gitMinerComment.setUpdatedAt(bitbucketComment.getUpdatedOn());
 
 
-        if (bitbucketComment.getContent() != null) {
+        if (bitbucketComment.getContent() != null && bitbucketComment.getContent().getRaw() != null) {
             gitMinerComment.setBody(bitbucketComment.getContent().getRaw());
+        } else {
+            gitMinerComment.setBody("El mensaje de este comentario está vacío");
         }
 
 

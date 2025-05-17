@@ -55,7 +55,7 @@ public class BitBucketMinerController {
     @Autowired
     private RestTemplate restTemplate;
 
-    final String gitMinerApiUrl = "http://localhost:8081/bitbucketminer/v1/projects";
+    final String gitMinerApiUrl = "http://localhost:8080/gitminer/projects";
 
     @GetMapping("/bitbucket/{workspace}/{repo}")
     @Operation(
@@ -67,7 +67,7 @@ public class BitBucketMinerController {
             @ApiResponse(responseCode = "404",content = {@Content(schema = @Schema())})
     })
 
-    public ResponseEntity<Project> getRepositoryData(
+    public Project getRepositoryData(
             @PathVariable String workspace,
             @PathVariable String repo,
             @Parameter(description = "number of commits,default 5")
@@ -104,7 +104,7 @@ public class BitBucketMinerController {
 
         gitMinerProject.setIssues(transformedIssues);
 
-        return ResponseEntity.ok(gitMinerProject);
+        return gitMinerProject;
     }
 
     @PostMapping("/bitbucket/{workspace}/{repo}")
@@ -126,21 +126,18 @@ public class BitBucketMinerController {
             @Parameter(description = "maximum of pages,default 2")
             @RequestParam(defaultValue = "2") Integer maxPages) {
 
-        ResponseEntity<Project> response = getRepositoryData(
+        Project project = getRepositoryData(
                 workspace, repo, nCommits, nIssues, maxPages
         );
-        Project gitMinerProject = response.getBody();
 
-
-        HttpEntity<Project> request = new HttpEntity<>(gitMinerProject);
+        HttpEntity<Project> request = new HttpEntity<>(project);
         ResponseEntity<Project> gitMinerResponse = restTemplate.exchange(
                 gitMinerApiUrl,
                 HttpMethod.POST,
                 request,
                 Project.class
         );
-
-        return ResponseEntity.ok(gitMinerResponse.getBody());
+        return ResponseEntity.status(gitMinerResponse.getStatusCode()).body(gitMinerResponse.getBody());
     }
     @Operation(
             summary = "Obtains a Project",
